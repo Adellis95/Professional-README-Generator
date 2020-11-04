@@ -4,6 +4,43 @@ const fs = require("fs");
 const template = require('./utils/generateMarkdown');
 const validator = require('email-validator');
 
+let gitHubUserData;
+
+
+// Verify that a given GitHub exists and has at least one repo
+async function verifyGitHubAccount(username) {
+
+    if(username.length === 0) 
+        return 'username cannot be blank';
+    else{
+
+        const url = `https://api.github.com/users/${username}`;
+
+        // User GitHubUser Data
+        const userResp = await axios.get(url)
+
+        gitHubUserData = userResp.data;
+
+        reposUrl = userResp.data.repos_url;
+
+        if(typeof reposUrl === 'undefined')
+            return `GitHub username ${username} does not exist`;
+
+        reposResp = await axios.get(reposUrl);
+
+        const reposData = reposResp.data;
+
+        if(reposData.length === 0)
+            return `GitHub user ${username} has no repos`;
+
+        gitHubRepos = reposData;
+        
+        questions[1].choices = reposData.map(repo => repo.name);
+
+        return true;
+    };
+};
+
 // array of questions for user
 const questions = [
     {
