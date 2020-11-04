@@ -5,6 +5,8 @@ const template = require('./utils/generateMarkdown');
 const validator = require('email-validator');
 
 let gitHubUserData;
+let gitHubRepos;
+let selectedRepo;
 
 
 // Verify that a given GitHub exists and has at least one repo
@@ -41,58 +43,98 @@ async function verifyGitHubAccount(username) {
     };
 };
 
+// Filter callback for repo selection question. Sets defaults for subsequent
+// questions based on selected repo
+function setRepoDefaults(repoName) {
+
+    return new Promise((resolve,reject) => {
+
+        selectedRepo = gitHubRepos.find(repo => repo.name == repoName);
+
+        // Set repo name and description as defaults for Title and Description 
+        // question
+        questions[2].default = selectedRepo.description;
+
+        // Get contributors and tags from repo
+        axios.all([
+            axios.get(selectedRepo.contributors_url),
+            axios.get(selectedRepo.tags_url)
+        ])
+        .then(respArr => {
+            // Set repo contributors as default for Contributors question
+            questions[7].default = respArr[0].data.map(contributor => contributor.login).join(',');
+
+            resolve(repoName);
+        })
+        .catch(err => {
+            reject(new Error("Could not set defaults"));
+        });
+    })
+}
+
 // array of questions for user
 const questions = [
     {
-        type: "input",
-        name: "title",
-        message: "What is your project title?"
-    },
-    {
-        type: "input",
-        name: "badge",
-        message: "Please provide the badges links that you want"
-    },
-    {
-        type: "input",
-        name: "description",
-        message: "Please provide your project's description"
-    },
-    {
-        type: "input",
-        name: "installation",
-        message: "Please provide the installation instructions"
-    },
-    {
-        type: "input",
-        name: "usage",
-        message: "Please provide the project usage"
-    },
-    {
-        type: "input",
-        name: "licence",
-        message: "Please provide the project licence or your badge link"
-    },
-    {
-        type: "input",
-        name: "contributing",
-        message: "Please provide the contributing parties"
-    },
-    {
-        type: "input",
-        name: "test",
-        message: "Please provide the project tests"
-    },
-    {
-        type: "input",
         name: "username",
-        message: "What is your github user name?"
+        message: "What is your GitHub username?",
+        default: "Github username",
+        validate: verifyGitHubAccount
     },
     {
-        type: "input",
-        name: "repo",
-        message: "What is your repo link?"
+        type: "list",
+        name: "repoName",
+        message: "Select the project repo:",
+        filter:setRepoDefaults
     },
+    {
+        name: "title",
+        message: "Enter a project title:",
+    },
+    {
+        name: "description",
+        message: "Enter a project description:",
+    },
+    {
+        name: "installation",
+        message: "Enter installation instructions:"
+    },
+    {
+        name: "usage",
+        message: "Enter usage directions:"
+    },
+    {
+        type: "list",
+        name: "badge",
+        message: "Select license type:",
+        choices: [
+        "[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)", 
+        "[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)", 
+        "[![License: GPLv3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://opensource.org/licenses/GPL-3.0)", 
+        "[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)"]
+    },
+    {
+        type: "list",
+        name: "license",
+        message: "Provide the license associated to the selected badge:",
+        choices: [
+        "Apache-2.0",
+        "MIT",
+        "GPL-3.0",
+        "BSD-3-Clause"]
+    },
+    {
+        name: "contributors",
+        message: "Enter contibutors:",
+        default: "Github profile"
+    },
+    {
+        name: "tests",
+        message: "Enter tests:"
+    },
+    {
+        name: "email",
+        message: "Enter contact email:"
+    }
 ];
 
 // function to write README file

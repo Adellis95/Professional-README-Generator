@@ -6,7 +6,9 @@ module.exports.getReadMe = (userData,responses) => {
       return response.length === 0 ? 'None' : response
   }
   
-return `# ${noneIfNone(responses.title)}
+return `
+
+# ${noneIfNone(responses.title)}
 
 ${noneIfNone(responses.badge)}
 
