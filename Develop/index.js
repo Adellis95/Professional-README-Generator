@@ -1,3 +1,9 @@
+const axios = require("axios");
+const inquirer = require("inquirer");
+const fs = require("fs");
+const template = require('./utils/generateMarkdown');
+const validator = require('email-validator');
+
 // array of questions for user
 const questions = [
     {
