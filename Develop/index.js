@@ -69,8 +69,16 @@ function setRepoDefaults(repoName) {
         .catch(err => {
             reject(new Error("Could not set defaults"));
         });
-    })
-}
+    });
+};
+
+function validateEmail(email) {
+  
+    if(validator.validate(email))
+        return true;
+
+    return `${email} is not a valid email`;
+};
 
 // array of questions for user
 const questions = [
@@ -133,18 +141,29 @@ const questions = [
     },
     {
         name: "email",
-        message: "Enter contact email:"
+        message: "Enter contact email:",
+        validate: validateEmail
     }
 ];
-
-// function to write README file
-function writeToFile(fileName, data) {
-}
 
 // function to initialize program
 function init() {
 
-}
+    inquirer.prompt(questions).then(resp => {
+
+        generateReadMe(resp);
+    });
+};
+
+// function to write README file
+function generateReadMe(responses){
+
+    fs.writeFile("README.md", template.getReadMe(gitHubUserData, responses), (err) => {
+        if(err){
+            throw(err)
+        };
+    });
+};
 
 // function call to initialize program
 init();
