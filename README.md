@@ -52,7 +52,7 @@ THEN I am taken to the corresponding section of the README
 
 - cd in the Develop folder
 - In terminal, you must install: Node.js, Axios, Inquirer, Email-Validator
-  - run "init -y" to install a package.json
+  - run "npm init -y" to install a package.json
   - run "npm install inquirer" to install a package-lock.json with Inquirer
   - run "npm install axios" to install a package-lock.json with Axios
   - run "npm install email-validator" to install a package-lock.json with Email-Validator
